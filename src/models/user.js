@@ -1,37 +1,67 @@
 const mongoose = require("mongoose");
+const validator = require("validator")
+
 
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: true,         // Makes field mandatory
-    trim: true              // Removes extra spaces
+    trim: true,
+    minLength:4,
+    maxLength:15
   },
   lastName: {
     type: String,
-    required: true,
-    trim: true
+    trim: true,
+    minLength:4,
+    maxLength:15
   },
   emailId: {
     type: String,
     required: true,
-    unique: true,           // Prevent duplicate emails
-    lowercase: true,        // Normalize for matching
-    trim: true
+    unique: true,           
+    lowercase: true,        
+    trim: true,
+    validate(value){
+        if(!validator.isEmail(value)){
+            throw new Error("Invalid Email")
+        }
+    }
   },
   password: {
     type: String,
-    required: true
-    // Do not store plaintext passwords — hash before save!
+    required: true,
+    validate(value){
+        if(!validator.isStrongPassword(value)){
+            throw new Error("Weak password")
+        }
+    }
+    
   },
   age: {
     type: Number,
-    min: 0
+    min: 18,
   },
   gender: {
     type: String,
-    enum: ['male', 'female', 'other'] // Optional restriction
+    enum: ['male', 'female', 'other'] 
+  },
+  skills:{
+    type:[String],
+    validate: {
+    validator: function (arr) {
+      return arr.length <= 10;
+    },
+    message: 'You can have at most 10 skills.'
   }
-}, { timestamps: true }); // Adds createdAt and updatedAt
+  },
+  about:{
+    type:String,
+    default:"Hello I am looking for connectins",
+    minLength:4,
+    maxLength:55
+  }
+}, { timestamps: true }); 
 
 const User = mongoose.model("User", userSchema);
 
