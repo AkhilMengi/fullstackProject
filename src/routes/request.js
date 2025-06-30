@@ -18,7 +18,7 @@ requestRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res)
     }
 
     // Validate status value
-    const validStatuses = ["ignored", "accepted", "rejected", "interested"];
+    const validStatuses = ["ignored","interested"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: `${status} is not a valid status.` });
     }
@@ -51,6 +51,40 @@ requestRouter.post('/request/send/:status/:toUserId', userAuth, async (req, res)
   }
 });
 
+requestRouter.post('/request/review/:status/:requestId',userAuth,async(req,res)=>{
+    try{
+        const loggedInUserId=req?.user._id;
+        const {requestId,status} = req.params
+        
+    // Validate status value
+    const validStatuses = ["accepted","rejected"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: `${status} is not a valid status.` });
+    }
+
+    const connectionRequest = await Connection.findOne({
+        _id: requestId,
+        toUserId:loggedInUserId,
+        status: "interested",
+    })
+    if(!connectionRequest){
+        return res.status(404).json({message:"Connection Request Not Found"})
+    }
+
+    connectionRequest.status = status
+
+    const data = await connectionRequest.save()
+
+    res.status(201).json({
+        message:"Connection request status changed",
+        data:data
+    })
+
+    } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: `Error creating connection request: ${err.message}` });
+  }
+})
 
 
 module.exports= requestRouter
