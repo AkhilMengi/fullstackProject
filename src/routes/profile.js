@@ -5,21 +5,60 @@ const profileRouter = express.Router()
 const User = require('../models/user');
 const { userAuth } = require('../middlewares/auth');
 const { profileUpdateValidator } = require('../utils/validation');
+const Connection = require('../models/connectionRequest');
 
 //Getting all User
 profileRouter.get("/feed", userAuth, async (req, res) => {
     try {
-        const users = await User.find();
+        const loggedInUser = req.user._id;
+
+        // Step 1: Find all connections involving the logged-in user
+        const connections = await Connection.find({
+            $or: [
+                { fromUserId: loggedInUser },
+                { toUserId: loggedInUser }
+            ]
+        });
+
+        // Step 2: Build a set of user IDs to exclude
+        const excludedUserIds = new Set();
+        connections.forEach((conn) => {
+            // Exclude everyone connected or pending or ignored or rejected
+            excludedUserIds.add(String(conn.fromUserId));
+            excludedUserIds.add(String(conn.toUserId));
+        });
+        // Also exclude self
+        excludedUserIds.add(String(loggedInUser));
+
+        // Step 3: Fetch all other users
+        const limit = parseInt(req.query.limit) || 2;
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * limit;
+
+        const users = await User.find({
+            _id: { $nin: Array.from(excludedUserIds) }
+        })
+            .select("firstName lastName gender bio profilePicture")
+            .limit(limit)
+            .skip(skip);
 
         if (users.length === 0) {
-            return res.status(404).send("No users found");
+            return res.status(404).json({
+                message: "No users found"
+            });
         }
 
-        res.status(200).json(users);
+        res.status(200).json({
+            message: "User feed fetched successfully",
+            data: users
+        });
+
     } catch (err) {
-        res.status(500).send(`Error fetching users: ${err.message}`);
+        console.error(err);
+        res.status(500).json({ error: `Error fetching users: ${err.message}` });
     }
 });
+
 
 
 //Getting user profile
