@@ -62,7 +62,9 @@ authRouter.post('/login', async (req, res) => {
         if (!isValidPassword) {
             return res.status(401).send("Invalid credentials.");
         }
-
+        // Convert to plain object and remove password
+        const userWithoutPassword = existingUser.toObject();
+        delete userWithoutPassword.password;
         const token = jwt.sign({
             _id: existingUser._id
         },
@@ -75,9 +77,7 @@ authRouter.post('/login', async (req, res) => {
             sameSite: "strict"
         });
 
-        res.status(200).json({
-            message: `Welcome! ${existingUser.firstName}`
-        });
+        res.status(200).send(userWithoutPassword);
     } catch (err) {
         res.status(500).send(`Error: ${err.message}`);
     }
@@ -99,7 +99,7 @@ authRouter.post("/updatePassword", userAuth, async (req, res) => {
         if (!oldPassword || !newPassword) {
             return res.status(400).json({ error: "Both oldPassword and newPassword are required." });
         }
-       validateStrongPassword(newPassword)
+        validateStrongPassword(newPassword)
         const userWithPassword = await User.findById(req?.user._id).select("+password")
         if (!userWithPassword) {
             return res.status(404).json({ error: "Invalid Credentials" })
