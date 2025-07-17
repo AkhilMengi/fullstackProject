@@ -31,7 +31,32 @@ authRouter.post('/signup', async (req, res) => {
         });
 
         await user.save();
-        res.status(201).send("User added successfully.");
+        const token = jwt.sign({ id: user._id }, "DEVTINDER_!@##$$", {
+            expiresIn: "7d"
+        });
+        const profileComplete = Boolean(
+            user.skills?.length >= 3 &&  // at least 3 skills
+            user.about?.length >= 10 &&  // about section is at least 10 chars
+            user.age &&
+            user.gender
+        );
+
+        res.status(201).cookie("token", token, {
+            httpOnly: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        }).send({
+            message: "Signup successful",
+            user: {
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.emailId,
+                // optional:
+                profileComplete
+
+            }
+        });
+
 
     } catch (err) {
         console.error("Signup error:", err.message);

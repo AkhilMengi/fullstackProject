@@ -29,7 +29,7 @@ const validateStrongPassword = (password) => {
 
 
 const profileUpdateValidator = (updates) => {
-    const ALLOWED_UPDATES = ["skills", "about", "lastName"];
+    const ALLOWED_UPDATES = ["skills", "about", "lastName","gender"];
 
     if (!updates || Object.keys(updates).length === 0) {
         throw new Error("No updates provided");

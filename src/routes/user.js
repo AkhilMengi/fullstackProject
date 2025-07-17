@@ -11,7 +11,7 @@ userRouter.get("/user/requests", userAuth, async (req, res) => {
         const connectionRequests = await Connection.find({
             toUserId: loggedInUser,
             status: "interested"
-        }).populate("fromUserId", "firstName lastName gender ")
+        }).populate("fromUserId", "firstName lastName gender skills about ")
 
         if (connectionRequests.length === 0) {
             return res.status(404).json({
@@ -37,7 +37,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
                 { fromUserId: loggedInUser }
             ], status: "accepted"
         })
-        .populate("fromUserId", "firstName lastName gender ")
+        .populate("fromUserId", "firstName lastName gender skills about ")
         .populate("toUserId", "firstName lastName gender ")
 
 
@@ -54,7 +54,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
                 user: isSender ? row.toUserId : row.fromUserId,
                 role: isSender ? "sent" : "received",
                 connectionId: row._id,
-                status: row.status
+                status: row.status,
+                acceptedAt:row.updatedAt
             };
         });
         res.status(200).json({
