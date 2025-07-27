@@ -31,7 +31,7 @@ authRouter.post('/signup', async (req, res) => {
         });
 
         await user.save();
-        const token = jwt.sign({ id: user._id }, "DEVTINDER_!@##$$", {
+        const token = jwt.sign({ id: user._id }, process.env.JWT_TOKEN, {
             expiresIn: "7d"
         });
         const profileComplete = Boolean(
@@ -93,7 +93,7 @@ authRouter.post('/login', async (req, res) => {
         const token = jwt.sign({
             _id: existingUser._id
         },
-            "DEVTINDER_!@##$$",
+            process.env.JWT_TOKEN,
             { expiresIn: "1h" });
 
         res.cookie("token", token, {
