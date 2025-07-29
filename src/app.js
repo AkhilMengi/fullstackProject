@@ -8,6 +8,9 @@ const requestRouter = require('./routes/request');
 const userRouter = require('./routes/user');
 require('dotenv').config()
 const app = express();
+const http = require("http"); //socket.io
+const initializeSocket = require('./utils/socket');
+const chatRouter = require('./routes/chat');
 const PORT = 3000;
 
 // Middleware
@@ -23,12 +26,18 @@ app.use('/api', authRouter);
 app.use('/api', profileRouter);
 app.use('/api', requestRouter);
 app.use('/api', userRouter);
+app.use('/api', chatRouter);
+
+const server = http.createServer(app)
+
+
+initializeSocket(server)
 
 connectDB()
     .then(() => {
         console.log("✅ DB successfully connected");
 
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`🚀 Server is running at http://localhost:${PORT}`);
         });
     })
