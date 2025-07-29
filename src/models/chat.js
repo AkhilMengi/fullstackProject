@@ -9,6 +9,11 @@ const messageSchema = new mongoose.Schema({
     text: {
         type: String,
         required: true
+    },
+     status: {
+        type: String,
+        enum: ['sent', 'delivered', 'seen'],
+        default: 'sent',
     }
 }, { timestamps: true })
 
@@ -20,12 +25,7 @@ const chatSchema = new mongoose.Schema({
         required: true
     }],
 
-    messages: [messageSchema],
-    status: {
-        type: String,
-        enum: ['sent', 'delivered', 'seen'],
-        default: 'sent',
-    }
+    messages: [messageSchema]
 });
 
 
