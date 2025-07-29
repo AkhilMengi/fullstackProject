@@ -3,7 +3,7 @@ const Chat = require("../models/chat");
 
 const initializeSocket = (server) => {
    const io = socketIO(server, {
-    path: "/api/socket.io", // ✅ this must match frontend & nginx
+    // path: "/api/socket.io", // ✅ this must match frontend & nginx
     cors: {
         origin: "http://localhost:5173", // or your production domain
         credentials: true,
