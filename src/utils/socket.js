@@ -2,12 +2,13 @@ const socketIO = require("socket.io");
 const Chat = require("../models/chat");
 
 const initializeSocket = (server) => {
-    const io = socketIO(server, {
-        cors: {
-            origin: "http://localhost:5173", // Frontend origin
-            credentials: true,
-        },
-    });
+   const io = socketIO(server, {
+    path: "/api/socket.io", // ✅ this must match frontend & nginx
+    cors: {
+        origin: "http://localhost:5173", // or your production domain
+        credentials: true,
+    },
+});
 
     io.on("connection", (socket) => {
         console.log("🔌 New client connected:", socket.id);
@@ -40,7 +41,7 @@ const initializeSocket = (server) => {
                 if (!chat) {
                     chat = new Chat({
                         participants: [currentUser, targetId],
-                        messages
+                        messages: []
                     })
                 }
                 chat.messages.push({
